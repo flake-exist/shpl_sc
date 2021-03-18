@@ -2,16 +2,19 @@ import java.text.SimpleDateFormat
 
 object SHPL_CONSTANTS {
 
-  val shapley_anchor = (chain:String,ch_sep:String) => {
-    val ch_list:Seq[String]   = chain.split(ch_sep) // create list of channels
-    val freq:Map[String,Int]  = ch_list.groupBy(identity).mapValues(_.size) //frequency stat
+  val USER_PATH:String = "user_path"
+  val TIMELINE:String  = "timeline"
 
-    val unique_ch:Seq[String] = ch_list.distinct
+  val shapley_anchor = (chain:Seq[String]) => {
+//    val ch_list:Seq[String]   = chain.split(ch_sep) // create list of channels
+    val freq:Map[String,Int]  = chain.groupBy(identity).mapValues(_.size) //frequency stat
+
+    val unique_ch:Seq[String] = chain.distinct
     val cardinality:Int       = unique_ch.length
 
     val shpl_template:Seq[Double]   = List.fill(cardinality)(1.0/cardinality.toDouble)
     val shpl_val:Map[String,Double] = unique_ch.zip(shpl_template).toMap
-    val result                      = ch_list.map(elem => shpl_val(elem) / freq(elem))
+    val result                      = chain.map(elem => shpl_val(elem) / freq(elem))
     result
 
   }
@@ -22,4 +25,6 @@ object SHPL_CONSTANTS {
     val date_seq:Seq[String] = unix_seq_long.map(date_format.format(_))
     date_seq
   }
+
+
 }
