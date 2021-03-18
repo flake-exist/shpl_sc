@@ -45,12 +45,12 @@ object ShapleyCalc {
       withColumn("date_touch",unix_to_date_udf($"timeline",lit(TRANSIT),lit(format_template))).
       select($"channels",$"shapley",$"date_touch")
 
-    data_seq.show(20)
+//    data_seq.show(20)
 
     val data_conv = data_seq.
       withColumn("date_conv",element_at($"date_touch",-1))
 
-    data_conv.show(20)
+//    data_conv.show(20)
 //
     val data_explode = data_conv.
       withColumn("touch_data",explode(arrays_zip($"shapley",$"date_touch",$"channels"))).
@@ -60,19 +60,19 @@ object ShapleyCalc {
         $"touch_data.channels".as("channels"),
         $"date_conv")
 
-    val data_shapley_touch = data_explode.
-      groupBy($"channels",$"date_touch").
-      agg(count($"shapley").as("shapley"))
-
-    val data_shapley_conv = data_explode.
-      groupBy($"channels",$"date_conv").
-      agg(count($"shapley").as("shapley"))
+//    val data_shapley_touch = data_explode.
+//      groupBy($"channels",$"date_touch").
+//      agg(count($"shapley").as("shapley"))
+//
+//    val data_shapley_conv = data_explode.
+//      groupBy($"channels",$"date_conv").
+//      agg(count($"shapley").as("shapley"))
 
     val data_shapley = data_explode.
       groupBy($"channels").
-      agg(count($"shapley").as("shapley"))
+      agg(sum($"shapley").as("shapley"))
 
-    data_shapley.show(20)
+    data_shapley.show()
 
 //    val data_shapley = data_seq.
 //      withColumn("shapley_value", shapley_anchor_udf(
