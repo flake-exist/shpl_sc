@@ -19,12 +19,11 @@ object Shapley {
     val shapley_anchor_udf = spark.udf.register("shapley_anchor_udf",shapley_anchor)
     val unix_to_date_udf   = spark.udf.register("unix_to_date_udf",unix_to_date)
 
-    val currentOutput = Paths.get(System.getProperty(args(1))) //current output folder
+    val currentPath = Paths.get(System.getProperty(args(1)))
 
-    val TouchPath     = Paths.get(currentOutput.toString, "date_touch")
-    val ConvPath      = Paths.get(currentOutput.toString, "date_conv")
-    val GeneralPath   = Paths.get(currentOutput.toString, "general")
-
+    val TouchPath = Paths.get(currentPath.toString, "date_touch")
+    val ConvPath = Paths.get(currentPath.toString, "date_conv")
+    val GeneralPath = Paths.get(currentPath.toString, "general")
 
     val format_template = args(2).toLowerCase match {
       case "year"       => "yyyy"
@@ -49,16 +48,12 @@ object Shapley {
 
     val data_seq = data.
       withColumn("channels",split(col(USER_PATH_R),TRANSIT)).
-      withColumn("date_touch",split(col(TIMELINE),TRANSIT)).
-      withColumn("shapley_value", shapley_anchor_udf(
-        col(USER_PATH_R),
-        lit(TRANSIT),
-        lit(format_template))).
+      withColumn("date_touch",unix_to_date_udf(col(TIMELINE),lit(TRANSIT),lit(format_template))).
+      withColumn("shapley_value", shapley_anchor_udf($"channels")).
       select($"channels",$"shapley_value",$"date_touch")
 
     val data_conv = data_seq.
       withColumn("date_conv", element_at($"date_touch", -1))
-
 
     val data_explode = data_conv.
       withColumn("touch_data",explode(arrays_zip($"shapley_value",$"date_touch",$"channels"))).
