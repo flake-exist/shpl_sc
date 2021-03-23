@@ -1,6 +1,10 @@
 import java.text.SimpleDateFormat
 
+
 object SHPL_CONSTANTS {
+
+  val USER_PATH_R:String = "user_pathR"
+  val TIMELINE:String    ="timeline"
 
   val shapley_anchor = (chain:String,ch_sep:String) => {
     val ch_list:Seq[String]   = chain.split(ch_sep) // create list of channels
